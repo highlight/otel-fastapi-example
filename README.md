@@ -1,5 +1,7 @@
 # Python / OTel Quickstart
 
+This repository is built by highlight.io. If you want to get started with a simple OpenTelemetry (OTel) backend with a cloud service, you can head over to [highlight.io](https://highlight.io). 
+
 ## Development Setup
 
 ### Prerequisites
