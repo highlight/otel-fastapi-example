@@ -1,6 +1,8 @@
 # Python / OTel Quickstart
 
-This repository is built by highlight.io. If you want to get started with a simple OpenTelemetry (OTel) backend with a cloud service, you can head over to [highlight.io](https://highlight.io). 
+This repository is built by highlight.io, an open source observability platform that has both a cloud service and a self-hosted offering. 
+
+OpenTelemetry is a spec supported by many observability providers, but if you want an opinionated, easy to use, and fully featured observability platform, you can head over to [highlight.io](https://highlight.io).
 
 ## Development Setup
 
