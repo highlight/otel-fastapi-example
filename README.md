@@ -11,7 +11,7 @@
 2. Configure your HIGHLIGHT_PROJECT_ID in `o11y.py`
 3. Install dependencies:
    ```bash
-   poetry install
+   poetry install --no-root
    ```
 
 4. Run the app:
