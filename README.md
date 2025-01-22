@@ -12,7 +12,7 @@ OpenTelemetry is a spec supported by many observability providers, but if you wa
 
 ### Installation Steps
 1. Clone the repository:
-2. Configure your `HIGHLIGHT_PROJECT_ID` in `o11y.py`
+2. Configure your `HIGHLIGHT_PROJECT_ID` (or your vendor's specific config) in `o11y.py`
 3. Install dependencies:
    ```bash
    poetry install --no-root
