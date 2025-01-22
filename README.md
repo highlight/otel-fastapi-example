@@ -1,4 +1,4 @@
-# Python / OTel Quickstart
+# OpenTelemetry FastAPI Example
 
 This repository is built by highlight.io, an open source observability platform that has both a cloud service and a self-hosted offering. 
 
