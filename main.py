@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from typing import Callable, Awaitable
 from starlette.responses import Response
 from datetime import datetime, timedelta
+from opentelemetry.propagators import TraceContextTextMapPropagator
 import os
 import uvicorn
 
@@ -25,7 +26,10 @@ app = FastAPI(debug=True)
 
 @app.middleware("http")
 async def trace_middleware(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-    with tracer.start_as_current_span(f"{request.method} {request.url.path}"):
+    traceparent = TraceContextTextMapPropagator().extract({
+        "traceparent": request.headers.get("traceparent")
+    })
+    with tracer.start_as_current_span(f"{request.method} {request.url.path}", context=traceparent):
         counter.add(1)
         start_time = datetime.now()
         response = await call_next(request)
