@@ -3,6 +3,8 @@ import os
 from typing import Optional
 
 from opentelemetry import metrics, trace
+from opentelemetry.sdk.metrics.export import AggregationTemporality
+from opentelemetry.sdk.metrics import Counter, Histogram, UpDownCounter
 from opentelemetry._logs import set_logger_provider
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
@@ -83,14 +85,24 @@ def create_tracer(
 
     return tracer
 
-def get_meter(service_name: str, environment: Optional[str] = "production") -> metrics.Meter:
+def get_meter(service_name: str, environment: Optional[str] = "production", local_debug: bool = False) -> metrics.Meter:
     if environment is None:
         environment = "production"
     commit = os.getenv("RENDER_GIT_COMMIT", "unknown")
 
-    console_metric_reader = PeriodicExportingMetricReader(exporter=ConsoleMetricExporter(), export_interval_millis=1000)
-    otlp_metric_reader = PeriodicExportingMetricReader(exporter=OTLPMetricExporter(endpoint=EXPORTER_OTLP_ENDPOINT, insecure=True),
-                                                   export_interval_millis=1000)
+
+    preferred_temporality: dict[type, AggregationTemporality] = {
+            Counter: AggregationTemporality.DELTA,
+            UpDownCounter: AggregationTemporality.DELTA,
+            Histogram: AggregationTemporality.DELTA,
+    }
+
+    readers = [PeriodicExportingMetricReader(exporter=OTLPMetricExporter(endpoint=EXPORTER_OTLP_ENDPOINT, insecure=True, preferred_temporality=preferred_temporality))]
+    if local_debug:
+        readers.append(PeriodicExportingMetricReader(exporter=ConsoleMetricExporter(
+            preferred_temporality=preferred_temporality
+        ), export_interval_millis=1000))
+
     provider = MeterProvider(resource=Resource.create(
         {
             "service.name": service_name,
@@ -98,7 +110,7 @@ def get_meter(service_name: str, environment: Optional[str] = "production") -> m
             "environment": environment,
             "commit": commit
         }
-    ), metric_readers=[console_metric_reader, otlp_metric_reader])
+    ), metric_readers=readers)
     metrics.set_meter_provider(provider)
     meter = metrics.get_meter(service_name)
     return meter
