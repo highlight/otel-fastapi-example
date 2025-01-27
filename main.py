@@ -6,7 +6,6 @@ from starlette.responses import Response
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from datetime import datetime, timedelta
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
 
 import os
 import requests
@@ -27,6 +26,8 @@ counter = meter.create_counter("request_count")
 logger.info("Starting the application")
 
 app = FastAPI(debug=True)
+
+RequestsInstrumentor().instrument()
 
 @app.middleware("http")
 async def trace_middleware(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
