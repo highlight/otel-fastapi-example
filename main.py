@@ -3,9 +3,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from typing import Callable, Awaitable
 from starlette.responses import Response
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from datetime import datetime, timedelta
-from opentelemetry.propagators import TraceContextTextMapPropagator
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
 import os
+import requests
 import uvicorn
 
 from o11y import create_logger, create_tracer, get_meter
@@ -14,7 +18,7 @@ service_name = "backend"
 # Initialize observability tools
 logger = create_logger(service_name, os.getenv("ENVIRONMENT"), local_debug=False)
 tracer = create_tracer(service_name, os.getenv("ENVIRONMENT"), local_debug=False)
-meter = get_meter(service_name, os.getenv("ENVIRONMENT"))
+meter = get_meter(service_name, os.getenv("ENVIRONMENT"), local_debug=False)
 
 histogram = meter.create_histogram("request_duration_histogram")
 gauge = meter.create_gauge("request_duration_gauge")
@@ -42,6 +46,8 @@ async def trace_middleware(request: Request, call_next: Callable[[Request], Awai
 @app.get("/")
 async def health():
     logger.info("Health check called")
+    response = requests.get("http://httpbin.org/headers")
+    logger.info(f"Dummy request's headers: {response.json()}")
     return JSONResponse(content={"response": "hi", "status_code": 200})
 
 if __name__ == "__main__":
