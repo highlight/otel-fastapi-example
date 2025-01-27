@@ -45,7 +45,7 @@ async def trace_middleware(request: Request, call_next: Callable[[Request], Awai
 
 @app.get("/")
 async def health():
-    logger.info("Health check called")
+    logger.info("Endpoint called")
     response = requests.get("http://httpbin.org/headers")
     logger.info(f"Dummy request's headers: {response.json()}")
     return JSONResponse(content={"response": "hi", "status_code": 200})
