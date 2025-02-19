@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from typing import Callable, Awaitable
 from starlette.responses import Response
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from datetime import datetime, timedelta
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
@@ -26,22 +27,20 @@ logger.info("Starting the application")
 
 app = FastAPI(debug=True)
 
+FastAPIInstrumentor.instrument_app(app)
+
 RequestsInstrumentor().instrument()
 
 @app.middleware("http")
 async def trace_middleware(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-    traceparent = TraceContextTextMapPropagator().extract({
-        "traceparent": request.headers.get("traceparent")
-    })
-    with tracer.start_as_current_span(f"{request.method} {request.url.path}", context=traceparent):
-        counter.add(1)
-        start_time = datetime.now()
-        response = await call_next(request)
-        end_time = datetime.now()
-        time_delta: timedelta = end_time - start_time
-        histogram.record(time_delta.total_seconds())
-        gauge.set(time_delta.total_seconds())
-        return response
+    counter.add(1)
+    start_time = datetime.now()
+    response = await call_next(request)
+    end_time = datetime.now()
+    time_delta: timedelta = end_time - start_time
+    histogram.record(time_delta.total_seconds())
+    gauge.set(time_delta.total_seconds())
+    return response
 
 @app.get("/")
 async def health():
