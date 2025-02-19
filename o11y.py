@@ -17,10 +17,16 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
-EXPORTER_OTLP_ENDPOINT = os.getenv("OTEL_ENDPOINT","https://otel.highlight.io:4317")
+from dotenv import load_dotenv
 
+load_dotenv()
+
+EXPORTER_OTLP_ENDPOINT = os.getenv("OTEL_ENDPOINT","https://otel.highlight.io:4317")
 print("OTEL Endpoint is: ", EXPORTER_OTLP_ENDPOINT)
-HIGHLIGHT_PROJECT_ID = "EMPTY"
+
+# read the HIGHLIGHT_PROJECT_ID from the environment variable
+HIGHLIGHT_PROJECT_ID = os.getenv("HIGHLIGHT_PROJECT_ID", "EMPTY")
+print("HIGHLIGHT_PROJECT_ID is: ", HIGHLIGHT_PROJECT_ID)
 
 import sys
 
